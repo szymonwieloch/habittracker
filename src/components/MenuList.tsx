@@ -7,9 +7,39 @@ import {
   List as ListIcon,
 } from "@material-ui/icons";
 
+import withFirebaseAuth from "react-with-firebase-auth";
+import { WrappedComponentProps } from "react-with-firebase-auth";
+
+import { providers, auth } from "../firebase";
+
 import { Link } from "react-router-dom";
 
-const MenuList = () => {
+interface AuthProps {}
+
+const MenuList = (props: WrappedComponentProps) => {
+  let loginUrls = null;
+  if (props.user) {
+    loginUrls = (
+      <React.Fragment>
+        <Link to="/addhabit">
+          <ListItem button>
+            <ListItemIcon>
+              <AddIcon />
+            </ListItemIcon>
+            <ListItemText primary="Add habit" />
+          </ListItem>
+        </Link>
+        <Link to="/habits">
+          <ListItem button>
+            <ListItemIcon>
+              <ListIcon />
+            </ListItemIcon>
+            <ListItemText primary="Habits" />
+          </ListItem>
+        </Link>
+      </React.Fragment>
+    );
+  }
   return (
     <List>
       <Link to="/">
@@ -20,38 +50,25 @@ const MenuList = () => {
           <ListItemText primary="Home" />
         </ListItem>
       </Link>
-      <Link to="/addhabit">
-        <ListItem button>
-          <ListItemIcon>
-            <AddIcon />
-          </ListItemIcon>
-          <ListItemText primary="Add habit" />
-        </ListItem>
-      </Link>
-      <Link to="/habits">
-        <ListItem button>
-          <ListItemIcon>
-            <ListIcon />
-          </ListItemIcon>
-          <ListItemText primary="Habits" />
-        </ListItem>
-      </Link>
-      <Link to="/login">
-        <ListItem button>
-          <ListItemIcon>
-            <PersonIcon />
-          </ListItemIcon>
-          <ListItemText primary="Login" />
-        </ListItem>
-      </Link>
 
-      {/* <ListItem button key={text}> */}
-      {/* <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
-            <ListItemText primary={text} />
-          </ListItem>
-        ))} */}
+      {loginUrls}
+      <ListItem
+        button
+        onClick={props.user ? props.signOut : props.signInWithGoogle}
+      >
+        <ListItemIcon>
+          <PersonIcon />
+        </ListItemIcon>
+        <ListItemText
+          // primary="Login"
+          primary={props.user ? `Logout ${props.user.displayName}` : "Login"}
+        />
+      </ListItem>
     </List>
   );
 };
 
-export default MenuList;
+export default withFirebaseAuth({
+  providers: providers,
+  firebaseAppAuth: auth,
+})(MenuList);
